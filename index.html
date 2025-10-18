@@ -57,15 +57,13 @@
           <p><i class="fas fa-phone"></i> +57 321 756 6840</p>
           <p><i class="fas fa-phone"></i> +57 315 066 6697</p>
           <div class="social-links">
-            <a href="https://wa.me/573217566840" class="social-link" target="_blank"><i class="fab fa-whatsapp"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://wa.me/573217566840" class="social-link" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.instagram.com/bellezaestetica_carolsalgado?igsh=MWp2dWpjMHA4d3lzcA==" class="social-link" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.facebook.com/share/1CbbdEfj5q/" class="social-link" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
           </div>
         </div>
         <form class="contact-form">
           <input type="text" placeholder="Nombre" required>
-          <input type="email" placeholder="Email" required>
-          <input type="tel" placeholder="Teléfono">
           <select required>
             <option value="" disabled selected>Servicio</option>
             <option value="uñas">Uñas</option>
@@ -81,7 +79,6 @@
     </div>
   </section>
 
-  <!-- Sección de Ubicación -->
   <section class="location-section" id="ubicacion">
     <div class="container">
       <h2>Nuestra Ubicación</h2>
@@ -147,7 +144,29 @@
     </div>
   </div>
 
-  <a href="https://wa.me/573217566840" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
+  <div class="whatsapp-float">
+    <div class="whatsapp-tooltip">
+      <p>Selecciona un servicio:</p>
+      <a href="https://wa.me/573217566840" class="whatsapp-option" data-service="Sala de Belleza Mary Salgado">
+        <i class="fab fa-whatsapp"></i>
+        <div class="option-details">
+          <span class="service-name">Sala de Belleza</span>
+          <span class="phone-number">321 756 6840</span>
+        </div>
+      </a>
+      <a href="https://wa.me/573150666697" class="whatsapp-option" data-service="Belleza Estética">
+        <i class="fab fa-whatsapp"></i>
+        <div class="option-details">
+          <span class="service-name">Belleza Estética</span>
+          <span class="phone-number">315 066 6697</span>
+        </div>
+      </a>
+    </div>
+    <button class="whatsapp-button">
+      <i class="fab fa-whatsapp"></i>
+    </button>
+  </div>
+  <!-- Aquí estuvo ArsenioLupin -->
   <script src="js/main.js"></script>
 </body>
 </html>

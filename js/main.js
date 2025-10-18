@@ -1,3 +1,5 @@
+// Aquí estuvo ArsenioLupin
+
 // Datos de servicios
 const servicios = [
   {
@@ -155,25 +157,99 @@ function cargarServicios() {
       const serviceCard = document.createElement('div');
       serviceCard.className = 'service-card';
       
-      const itemsHTML = servicio.items.map(item => `<li>${item}</li>`).join('');
+      // Crear un ID único para cada tarjeta basado en el título del servicio
+      const cardId = servicio.titulo.toLowerCase().replace(/\s+/g, '-');
+      
+      const itemsHTML = servicio.items.map(item => {
+        const itemId = item.toLowerCase().replace(/\s+/g, '-');
+        return `
+          <li class="service-item" 
+              data-service="${item}" 
+              id="${cardId}-${itemId}">
+            <span>${item}</span>
+          </li>
+        `;
+      }).join('');
       
       serviceCard.innerHTML = `
         <img src="${servicio.imagen}" alt="${servicio.titulo}" class="service-img">
         <div class="service-content">
           <h3>${servicio.titulo}</h3>
           <p>${servicio.descripcion}</p>
-          <ul class="service-items">
-            ${itemsHTML}
-          </ul>
-          <a href="https://wa.me/${servicio.whatsapp}?text=Hola%20👋%20quiero%20más%20información%20sobre%20${encodeURIComponent(servicio.titulo)}" 
-             target="_blank" 
-             class="btn-agendar">
-            Agendar Cita
-          </a>
+          <div class="service-items-container">
+            <ul class="service-items">
+              ${itemsHTML}
+            </ul>
+            <div class="whatsapp-button-container">
+              <a href="#" 
+                 target="_blank" 
+                 class="btn-agendar"
+                 data-whatsapp="${servicio.whatsapp}"
+                 data-servicio="${servicio.titulo}">
+                Agendar Cita
+              </a>
+            </div>
+          </div>
         </div>
       `;
       
       servicesGrid.appendChild(serviceCard);
+      
+      // Agregar manejadores de clic a los ítems de servicio
+      const serviceItems = serviceCard.querySelectorAll('.service-item');
+      const serviceItemsContainer = serviceCard.querySelector('.service-items');
+      const whatsappButtonContainer = serviceCard.querySelector('.whatsapp-button-container');
+      const btnAgendar = serviceCard.querySelector('.btn-agendar');
+      
+      serviceItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.stopPropagation(); // Evitar que el clic se propague a la tarjeta
+          
+          // Si el ítem ya está seleccionado, deseleccionarlo
+          if (this.classList.contains('selected')) {
+            this.classList.remove('selected');
+            whatsappButtonContainer.classList.remove('visible');
+            serviceItemsContainer.classList.remove('has-selection');
+            return;
+          }
+          
+          // Obtener el ítem seleccionado
+          const selectedItem = this.dataset.service;
+          const selectedItemId = this.id;
+          
+          // Actualizar el enlace de WhatsApp con el ítem seleccionado
+          if (btnAgendar) {
+            const whatsappNumber = btnAgendar.dataset.whatsapp;
+            const servicioNombre = btnAgendar.dataset.servicio;
+            const mensaje = `Hola, estoy interesado/a en el servicio de ${servicioNombre}: ${selectedItem}`;
+            btnAgendar.href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
+            btnAgendar.dataset.service = selectedItem;
+            
+            // Mover el botón de WhatsApp después del ítem seleccionado
+            const selectedElement = document.getElementById(selectedItemId);
+            if (selectedElement) {
+              // Mostrar el botón de WhatsApp
+              whatsappButtonContainer.classList.add('visible');
+              
+              // Hacer scroll suave hasta el ítem seleccionado
+              selectedElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+          
+          // Marcar que hay una selección
+          serviceItemsContainer.classList.add('has-selection');
+          
+          // Remover la clase 'selected' de todos los ítems en esta tarjeta
+          serviceItems.forEach(i => i.classList.remove('selected'));
+          
+          // Agregar la clase 'selected' al ítem clickeado
+          this.classList.add('selected');
+          
+          // Agregar clase de animación
+          this.classList.add('pulse');
+          setTimeout(() => this.classList.remove('pulse'), 500);
+        });
+      });
     });
   }
 }
@@ -321,15 +397,22 @@ function resetAutoplay() {
   startAutoplay();
 }
 
-// Pausar autoplay al hacer hover
+// Inicializar componentes cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
+  // Inicializar autoplay de la galería
   setTimeout(() => {
     const galleryGrid = document.querySelector('.gallery-grid');
     if (galleryGrid) {
-      galleryGrid.addEventListener('mouseenter', () => clearInterval(autoplayInterval));
+      galleryGrid.addEventListener('mouseenter', resetAutoplay);
       galleryGrid.addEventListener('mouseleave', startAutoplay);
     }
-  }, 500);
+  }, 1000);
+  
+  // Inicializar el botón de WhatsApp
+  inicializarWhatsAppButton();
+  
+  // Inicializar Lightbox
+  inicializarLightbox();
 });
 
 // Lightbox
@@ -440,28 +523,48 @@ function inicializarFormulario() {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       
+      // Obtener solo los campos que existen en el formulario actual
       const nombre = form.querySelector('input[type="text"]').value;
-      const email = form.querySelector('input[type="email"]').value;
-      const telefono = form.querySelector('input[type="tel"]').value;
       const servicio = form.querySelector('select').value;
       const mensaje = form.querySelector('textarea').value;
       
-      // Crear mensaje para WhatsApp
-      const mensajeWhatsApp = `Hola 👋
-Nombre: ${nombre}
-Email: ${email}
-Teléfono: ${telefono}
-Servicio: ${servicio}
-Mensaje: ${mensaje}`;
+      // Validar que los campos requeridos no estén vacíos
+      if (!nombre || servicio === '' || !mensaje) {
+        alert('Por favor completa todos los campos del formulario.');
+        return;
+      }
       
-      const url = `https://wa.me/573217566840?text=${encodeURIComponent(mensajeWhatsApp)}`;
+      // Determinar el número de teléfono según el servicio
+      let numeroTelefono;
+      const servicioMinusculas = servicio.toLowerCase();
+      
+      if (['pestañas', 'cejas'].includes(servicioMinusculas)) {
+        // Número para Pestañas y Cejas
+        numeroTelefono = '573150666697';
+      } else {
+        // Número para Uñas, Maquillaje, Depilación en cera, Capilar
+        numeroTelefono = '573217566840';
+      }
+      
+      // Crear mensaje para WhatsApp con los campos disponibles
+      const mensajeWhatsApp = `Hola 👋\n` +
+        `*Nuevo mensaje de contacto*\n\n` +
+        `*Nombre:* ${nombre}\n` +
+        `*Servicio de interés:* ${servicio}\n\n` +
+        `*Mensaje:*\n${mensaje}`;
+      
+      // Codificar el mensaje para URL
+      const mensajeCodificado = encodeURIComponent(mensajeWhatsApp);
+      const url = `https://wa.me/${numeroTelefono}?text=${mensajeCodificado}`;
+      
+      // Abrir WhatsApp en una nueva pestaña
       window.open(url, '_blank');
       
       // Limpiar formulario
       form.reset();
       
       // Mostrar mensaje de confirmación
-      alert('¡Gracias por tu mensaje! Te redirigiremos a WhatsApp.');
+      alert('¡Gracias por tu mensaje! Serás redirigido a WhatsApp para completar tu solicitud.');
     });
   }
 }
@@ -510,6 +613,55 @@ function inicializarNavegacion() {
       }
     });
   });
+}
+
+// Inicializar el botón flotante de WhatsApp
+function inicializarWhatsAppButton() {
+  const whatsappButton = document.querySelector('.whatsapp-button');
+  const whatsappTooltip = document.querySelector('.whatsapp-tooltip');
+  
+  if (whatsappButton && whatsappTooltip) {
+    // Cerrar el tooltip al hacer clic fuera de él
+    document.addEventListener('click', function(e) {
+      if (!whatsappButton.contains(e.target) && !whatsappTooltip.contains(e.target)) {
+        whatsappTooltip.style.opacity = '0';
+        whatsappTooltip.style.visibility = 'hidden';
+        whatsappTooltip.style.transform = 'translateY(10px)';
+      }
+    });
+    
+    // Alternar visibilidad del tooltip al hacer clic en el botón
+    whatsappButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isVisible = whatsappTooltip.style.opacity === '1';
+      
+      if (isVisible) {
+        whatsappTooltip.style.opacity = '0';
+        whatsappTooltip.style.visibility = 'hidden';
+        whatsappTooltip.style.transform = 'translateY(10px)';
+      } else {
+        whatsappTooltip.style.opacity = '1';
+        whatsappTooltip.style.visibility = 'visible';
+        whatsappTooltip.style.transform = 'translateY(0)';
+      }
+    });
+
+    const whatsappOptions = document.querySelectorAll('.whatsapp-option');
+    whatsappOptions.forEach(option => {
+      const serviceName = option.querySelector('.service-name').textContent;
+      const phoneNumber = option.href.split('wa.me/')[1].split('?')[0];
+      const message = `Hola, estoy interesado/a en los servicios de ${serviceName}. ¿Podrían brindarme más información?`;
+      option.href = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+      
+      option.addEventListener('click', function(e) {
+        e.stopPropagation();
+        this.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+          this.style.transform = 'scale(1)';
+        }, 100);
+      });
+    });
+  }
 }
 
 // Animaciones al hacer scroll
