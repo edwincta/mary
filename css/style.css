@@ -1,4 +1,3 @@
-/* Variables CSS */
 :root {
   --color-primario: #ffb6c1;
   --color-secundario: #000000;
@@ -8,7 +7,6 @@
   --transicion: all 0.3s ease;
 }
 
-/* Reset y Base */
 * {
   margin: 0;
   padding: 0;
@@ -45,15 +43,26 @@ body {
 }
 
 .header-container {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 1rem 0;
+  position: relative;
+}
+
+.logo {
+  grid-column: 2;
+  justify-self: center;
 }
 
 .logo-img {
   height: 60px;
   width: auto;
+  display: block;
+}
+
+.main-nav {
+  justify-self: end;
 }
 
 /* Navegación */
@@ -118,6 +127,31 @@ body {
   margin-top: 80px;
 }
 
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+  .hero {
+    min-height: 60vh; /* Reducir la altura en móviles */
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                url('../imagen/BANNER2.jpeg') center/contain no-repeat;
+    background-color: #000; /* Fondo negro para los espacios que queden en los lados */
+    padding: 2rem 1rem; /* Ajustar el padding */
+  }
+  
+  .hero-content {
+    max-width: 90%; /* Asegurar que el contenido no toque los bordes */
+  }
+  
+  .hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .hero p {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
 .hero-content {
   max-width: 800px;
 }
@@ -127,12 +161,45 @@ body {
   margin-bottom: 1rem;
   font-weight: 700;
   animation: fadeInUp 1s ease;
+  line-height: 1.2;
 }
 
 .hero p {
   font-size: 1.25rem;
   margin-bottom: 2rem;
   animation: fadeInUp 1.2s ease;
+  max-width: 600px;
+}
+
+/* Media Queries for Responsive Text */
+@media (max-width: 1024px) {
+  .hero h1 {
+    font-size: 2.2rem;
+  }
+  
+  .hero p {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+  
+  .hero p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 1.6rem;
+  }
+  
+  .hero p {
+    font-size: 0.9rem;
+  }
 }
 
 .cta-button {
@@ -275,27 +342,89 @@ h2::after {
 
 .service-items {
   list-style: none;
-  margin-bottom: auto;
+  margin: 1rem 0;
+  padding: 0;
+  cursor: pointer;
   flex-grow: 1;
 }
 
-.service-items li {
-  padding: 0.8rem 0;
-  padding-left: 1.5rem;
-  border-bottom: 1px solid #f5f5f5;
-  font-size: 0.9rem;
-  color: #555;
+.service-items {
   position: relative;
-  transition: all 0.3s ease;
+  transition: all 0.4s ease;
+}
+
+.service-items li {
+  margin-bottom: 0.5rem;
+  padding: 0.8rem 1.2rem 0.8rem 3rem;
+  position: relative;
+  border-radius: 8px;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid transparent;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  opacity: 1;
+  transform: translateX(0);
+  max-height: 1000px;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+/* Ocultar elementos no seleccionados cuando hay una selección */
+.service-items.has-selection li:not(.selected) {
+  opacity: 0;
+  max-height: 0;
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border: none;
+  transform: translateX(-20px);
+  pointer-events: none;
+}
+
+/* Estilo para el contenedor del botón de WhatsApp */
+.whatsapp-button-container {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, margin 0.4s ease;
+  text-align: center;
+}
+
+.whatsapp-button-container.visible {
+  max-height: 100px;
+  margin: 1rem 0;
+}
+
+.service-items li:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background-color: #fff9fa;
+}
+
+.service-items li.selected {
+  background: linear-gradient(135deg, #fff5f7 0%, #ffeef1 100%);
+  border: 1px solid var(--color-primario);
+  color: #d23369;
+  font-weight: 600;
+  transform: translateX(8px);
+  box-shadow: 0 4px 15px rgba(255, 105, 140, 0.2);
+  padding-left: 2.8rem;
 }
 
 .service-items li::before {
   content: '✓';
   position: absolute;
-  left: 0;
+  left: 1rem;
   color: var(--color-primario);
   font-weight: bold;
   font-size: 1rem;
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: scale(0);
+}
+
+.service-items li.selected::before {
+  opacity: 1;
+  transform: scale(1.2);
 }
 
 .service-items li:hover {
@@ -307,20 +436,31 @@ h2::after {
   border-bottom: none;
 }
 
+@keyframes parpadeo {
+  0% { box-shadow: 0 0 0 0 rgba(200, 60, 90, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(200, 60, 90, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(200, 60, 90, 0); }
+}
+
 .btn-agendar {
-  display: block;
-  background-color: #ffb6c1;
-  color: white;
-  padding: 0.8rem 1.8rem;
-  border-radius: 8px;
+  display: inline-block;
+  background-color: #d43f6d; /* Color más oscuro */
+  color: white !important;
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px;
   text-decoration: none;
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(200, 60, 90, 0.3);
   transition: all 0.3s ease;
+  border: none;
   font-size: 0.95rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
   width: 100%;
-  text-align: center;
-  margin-top: 1.5rem;
+  max-width: 200px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  animation: parpadeo 2s infinite;
 }
 
 .btn-agendar:hover {
@@ -847,25 +987,108 @@ h2::after {
   position: fixed;
   bottom: 30px;
   right: 30px;
-  background-color: #25D366;
-  color: white;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.whatsapp-button {
+  background-color: #25d366;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
   width: 60px;
   height: 60px;
-  border-radius: 50%;
+  font-size: 30px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
-  z-index: 999;
-  transition: var(--transicion);
-  text-decoration: none;
+  transition: all 0.3s ease;
 }
 
-.whatsapp-float:hover {
-  transform: translateY(-5px) scale(1.1);
-  box-shadow: 0 8px 20px rgba(37, 211, 102, 0.5);
-  color: white;
+.whatsapp-button:hover {
+  background-color: #128c7e;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4);
+}
+
+.whatsapp-tooltip {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+}
+
+.whatsapp-tooltip p {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.whatsapp-option {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  margin: 8px 0;
+  background: #f8f9fa;
+  border-radius: 12px;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.whatsapp-option i {
+  margin-right: 12px;
+  color: #25d366;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.option-details {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.service-name {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.phone-number {
+  font-size: 13px;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.whatsapp-option:hover {
+  background: #f1f5f9;
+  transform: translateX(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.whatsapp-float:hover .whatsapp-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 /* Animaciones */
@@ -1099,30 +1322,41 @@ h2::after {
   z-index: 1;
 }
 
+@keyframes parpadeo-azul {
+  0% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(66, 133, 244, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0); }
+}
+
 .map-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  background-color: #ffb6c1;
-  color: white;
+  background-color: #1a73e8; /* Azul de Google más oscuro */
+  color: white !important;
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px;
   text-decoration: none;
-  padding: 0.9rem 2rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-weight: 500;
+  margin-top: 2rem;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  animation: parpadeo-azul 2s infinite;
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
 }
 
+/* Aquí estuvo ArsenioLupin */
+
 .map-button:hover {
-  background-color: #ff99bb;
+  background-color: #2b7de9;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 16px rgba(26, 115, 232, 0.4);
 }
 
 .map-button i {
-  font-size: 1rem;
+  margin-right: 8px;
+  font-size: 1.2rem;
 }
 
 /* Responsive para ubicación */
