@@ -128,20 +128,48 @@ document.addEventListener('DOMContentLoaded', function() {
 function inicializarMenu() {
   const hamburger = document.querySelector('.hamburger');
   const mainNav = document.querySelector('.main-nav');
+  const navList = document.querySelector('.nav-list');
   const navLinks = document.querySelectorAll('.nav-link');
+  let isMenuOpen = false;
 
-  if (hamburger && mainNav) {
-    hamburger.addEventListener('click', function() {
-      this.classList.toggle('active');
-      mainNav.classList.toggle('active');
+  // Función para abrir el menú
+  function abrirMenu() {
+    hamburger.classList.add('active');
+    navList.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    isMenuOpen = true;
+  }
+
+  // Función para cerrar el menú
+  function cerrarMenu() {
+    hamburger.classList.remove('active');
+    navList.classList.remove('active');
+    document.body.style.overflow = '';
+    isMenuOpen = false;
+  }
+
+  // Toggle del menú al hacer clic en el botón de hamburguesa
+  if (hamburger && navList) {
+    hamburger.addEventListener('click', function(e) {
+      e.stopPropagation(); // Evitar que el evento se propague al documento
+      
+      if (isMenuOpen) {
+        cerrarMenu();
+      } else {
+        abrirMenu();
+      }
     });
 
     // Cerrar menú al hacer clic en un enlace
     navLinks.forEach(link => {
-      link.addEventListener('click', function() {
-        hamburger.classList.remove('active');
-        mainNav.classList.remove('active');
-      });
+      link.addEventListener('click', cerrarMenu);
+    });
+
+    // Cerrar menú al hacer clic fuera de él
+    document.addEventListener('click', function(e) {
+      if (isMenuOpen && !e.target.closest('.main-nav')) {
+        cerrarMenu();
+      }
     });
   }
 }
@@ -265,6 +293,8 @@ function getSlidesToShow() {
 
 function cargarGaleria() {
   const galleryGrid = document.querySelector('.gallery-grid');
+  let touchStartX = 0;
+  let touchEndX = 0;
   
   if (galleryGrid) {
     // Crear estructura del carrusel
@@ -278,8 +308,38 @@ function cargarGaleria() {
     imagenesGaleria.forEach((imagen, index) => {
       const galleryItem = document.createElement('div');
       galleryItem.className = 'gallery-item';
-      galleryItem.innerHTML = `<img src="${imagen}" alt="Trabajo ${index + 1}">`;
-      galleryItem.addEventListener('click', () => abrirLightbox(index));
+      galleryItem.innerHTML = `<img src="${imagen}" alt="Trabajo ${index + 1}" draggable="false">`;
+      galleryItem.addEventListener('click', (e) => {
+        // Evitar abrir lightbox si fue un deslizamiento
+        if (Math.abs(touchEndX - touchStartX) < 10) {
+          abrirLightbox(index);
+        }
+      });
+      
+      // Agregar event listeners para touch
+      galleryItem.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+      }, { passive: true });
+      
+      galleryItem.addEventListener('touchmove', (e) => {
+        touchEndX = e.touches[0].clientX;
+      }, { passive: true });
+      
+      galleryItem.addEventListener('touchend', () => {
+        const diff = touchStartX - touchEndX;
+        const swipeThreshold = 50; // Mínimo píxeles para considerar un deslizamiento
+        
+        if (diff > swipeThreshold) {
+          // Deslizamiento hacia la izquierda (siguiente)
+          nextSlide();
+          resetAutoplay();
+        } else if (diff < -swipeThreshold) {
+          // Deslizamiento hacia la derecha (anterior)
+          prevSlide();
+          resetAutoplay();
+        }
+      }, { passive: true });
+      
       carousel.appendChild(galleryItem);
     });
     
@@ -302,8 +362,15 @@ function cargarGaleria() {
     updateDots();
     
     // Event listeners para botones
-    controls.querySelector('.prev-btn').addEventListener('click', prevSlide);
-    controls.querySelector('.next-btn').addEventListener('click', nextSlide);
+    controls.querySelector('.prev-btn').addEventListener('click', () => {
+      prevSlide();
+      resetAutoplay();
+    });
+    
+    controls.querySelector('.next-btn').addEventListener('click', () => {
+      nextSlide();
+      resetAutoplay();
+    });
     
     // Responsive
     window.addEventListener('resize', () => {
